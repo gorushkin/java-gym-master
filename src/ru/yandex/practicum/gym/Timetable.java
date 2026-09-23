@@ -2,6 +2,7 @@ package ru.yandex.practicum.gym;
 
 import java.util.*;
 
+
 public class Timetable {
 
     private final Map<DayOfWeek, TreeMap<TimeOfDay, List<TrainingSession>>> timetable = new HashMap<>();
@@ -9,13 +10,7 @@ public class Timetable {
     private TreeMap<TimeOfDay, List<TrainingSession>> getDayOfWeekSessions(TrainingSession trainingSession) {
         var dayOfWeek = trainingSession.getDayOfWeek();
 
-        var dayOfWeekSessions = timetable.getOrDefault(dayOfWeek, null);
-
-        if (dayOfWeekSessions == null) {
-            timetable.put(dayOfWeek, new TreeMap<>());
-        }
-
-        return timetable.get((dayOfWeek));
+        return timetable.computeIfAbsent(dayOfWeek, i -> new TreeMap<>());
     }
 
     private List<TrainingSession> getTimeOfDaySessions(TrainingSession trainingSession) {
@@ -23,13 +18,7 @@ public class Timetable {
 
         var dayOfWeekSessions = getDayOfWeekSessions(trainingSession);
 
-        var timeOfDaySessions = dayOfWeekSessions.getOrDefault(timeOfDay, null);
-
-        if (timeOfDaySessions == null) {
-            dayOfWeekSessions.put(timeOfDay, new ArrayList<>());
-        }
-
-        return dayOfWeekSessions.get(timeOfDay);
+        return  dayOfWeekSessions.computeIfAbsent(timeOfDay, i -> new ArrayList<>());
     }
 
     public void addNewTrainingSession(TrainingSession trainingSession) {
@@ -42,9 +31,39 @@ public class Timetable {
         return timetable.get(dayOfWeek);
     }
 
-    public List<TrainingSession> getTrainingSessionsForDayAndTime(DayOfWeek dayOfWeek,
-            TimeOfDay timeOfDay) {
+    public List<TrainingSession> getTrainingSessionsForDayAndTime(DayOfWeek dayOfWeek, TimeOfDay timeOfDay) {
         var daySessions = getTrainingSessionsForDay(dayOfWeek);
-        return daySessions.getOrDefault(timeOfDay, null);
+
+        if (daySessions == null) {
+            return null;
+        }
+        return daySessions.get(timeOfDay);
+    }
+
+
+    public List<CounterOfTrainings> getCountByCoaches() {
+        HashMap<Coach, Integer> coachCountMap = new HashMap<>();
+
+        for (DayOfWeek day : DayOfWeek.values()) {
+            var currentDaySessionsMap = getTrainingSessionsForDay(day);
+
+            if (currentDaySessionsMap == null) {
+                continue;
+            }
+
+            for (var sessions : currentDaySessionsMap.values()) {
+                for (TrainingSession session : sessions) {
+                    var coach = session.getCoach();
+                    var nexCount = coachCountMap.getOrDefault(coach, 0) + 1;
+                    coachCountMap.put(coach, nexCount);
+                }
+            }
+        }
+
+
+        return coachCountMap.entrySet().stream()
+                .map((entry) -> new CounterOfTrainings(entry.getKey(), entry.getValue()))
+                .sorted(Comparator.comparingInt(CounterOfTrainings::count).reversed())
+                .toList();
     }
 }
