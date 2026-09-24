@@ -2,7 +2,6 @@ package ru.yandex.practicum.gym;
 
 import java.util.*;
 
-
 public class Timetable {
 
     private final Map<DayOfWeek, TreeMap<TimeOfDay, List<TrainingSession>>> timetable = new HashMap<>();
@@ -18,7 +17,7 @@ public class Timetable {
 
         var dayOfWeekSessions = getDayOfWeekSessions(trainingSession);
 
-        return  dayOfWeekSessions.computeIfAbsent(timeOfDay, i -> new ArrayList<>());
+        return dayOfWeekSessions.computeIfAbsent(timeOfDay, i -> new ArrayList<>());
     }
 
     public void addNewTrainingSession(TrainingSession trainingSession) {
@@ -40,7 +39,6 @@ public class Timetable {
         return daySessions.get(timeOfDay);
     }
 
-
     public List<CounterOfTrainings> getCountByCoaches() {
         HashMap<Coach, Integer> coachCountMap = new HashMap<>();
 
@@ -59,7 +57,6 @@ public class Timetable {
                 }
             }
         }
-
 
         return coachCountMap.entrySet().stream()
                 .map((entry) -> new CounterOfTrainings(entry.getKey(), entry.getValue()))
