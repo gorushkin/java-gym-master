@@ -6,23 +6,25 @@ public class Timetable {
 
     private final Map<DayOfWeek, TreeMap<TimeOfDay, List<TrainingSession>>> timetable = new HashMap<>();
 
-    private TreeMap<TimeOfDay, List<TrainingSession>> getDayOfWeekSessions(TrainingSession trainingSession) {
+    private TreeMap<TimeOfDay, List<TrainingSession>> getOrCreateSessionsForDay(
+            TrainingSession trainingSession
+    ) {
         var dayOfWeek = trainingSession.getDayOfWeek();
 
         return timetable.computeIfAbsent(dayOfWeek, i -> new TreeMap<>());
     }
 
-    private List<TrainingSession> getTimeOfDaySessions(TrainingSession trainingSession) {
+    private List<TrainingSession> getOrCreateSessionsForTime(TrainingSession trainingSession) {
         var timeOfDay = trainingSession.getTimeOfDay();
 
-        var dayOfWeekSessions = getDayOfWeekSessions(trainingSession);
+        var dayOfWeekSessions = getOrCreateSessionsForDay(trainingSession);
 
         return dayOfWeekSessions.computeIfAbsent(timeOfDay, i -> new ArrayList<>());
     }
 
     public void addNewTrainingSession(TrainingSession trainingSession) {
 
-        var timeOfDaySessions = getTimeOfDaySessions(trainingSession);
+        var timeOfDaySessions = getOrCreateSessionsForTime(trainingSession);
         timeOfDaySessions.add(trainingSession);
     }
 
